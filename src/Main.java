@@ -8,71 +8,11 @@ public class Main {
     public static void main(String[] args) throws IOException {
         Scanner calcInput = new Scanner(System.in);  // Create a Scanner object
         System.out.println("Enter your expression");
-        int result;
-        int[] numIntArray = new int[2]; // For integer number values
-        boolean isRoman = false, isArabic = false;
-
-        String[] operator;
-        int[] operands = new int[2];
-
         String input = calcInput.nextLine();  // Read user input
-        input = input.replaceAll("\\s",""); // Stripping from whitespaces
+
+        input = input.replaceAll("\\s", ""); // Stripping from whitespaces
         input = input.toUpperCase(); // In case of Roman - to uppercase
-        int len = input.length();
-
-        // If Arabic and Roman at the same time throws exception
-        if (input.matches(".*\\d.*")) {
-            isArabic = true;
-        }
-        if (input.contains("I") || input.contains("V") || input.contains("X")) {
-            isRoman = true;
-        }
-        if (isRoman && isArabic) {
-            throw new IOException();
-        }
-
-        if (isRoman) {
-            operator = input.split("[IVX]");
-            Arrays.sort(operator);
-            String[] operandsRoman = input.split("[-+*/]");
-            for (int i = 0; i < operandsRoman.length; i++) {
-                operands[i] = convertFromRoman(operandsRoman[i]);
-            }
-        } else {
-            operator = input.split("[0-9]+");
-            Arrays.sort(operator);
-            String[] operandsString = input.split("[-+*/]");
-            for (int i = 0; i < operandsString.length; i++) {
-                operands[i] = Integer.parseInt(operandsString[i]);
-            }
-        }
-
-        // Only numbers between 1 and 10 accepted
-        for (int operand : operands) {
-            if ((operand > 10) || (operand < 1)) {
-                throw new IOException();
-            }
-        }
-
-        result = switch (operator[2]) {
-            case "-" -> Operation.SUBTRACT(operands);
-            case "+" -> Operation.ADD(operands);
-            case "/" -> Operation.DIVIDE(operands);
-            case "*" -> Operation.MULTIPLY(operands);
-            default -> throw new IOException();
-        };
-
-        // For Roman can only be positive result
-        if (isRoman) {
-            if (result < 0) {
-                throw new IOException();
-            } else {
-                System.out.println(convertToRoman(result));
-            }
-        } else {
-            System.out.println(result);
-        }
-
+        System.out.println(calc(input));
     }
 
     public static int convertFromRoman(String romanNumber) {
@@ -142,5 +82,73 @@ public class Main {
 
         }
         return romanNum;
+    }
+
+
+    public static String calc(String input) throws IOException {
+        String[] symbols;
+        int[] operands = new int[2];
+        String operator = null;
+        int result;
+        boolean isRoman = false, isArabic = false;
+
+        // If Arabic and Roman at the same time throws exception
+        if (input.matches(".*\\d.*")) {
+            isArabic = true;
+        }
+        if (input.contains("I") || input.contains("V") || input.contains("X")) {
+            isRoman = true;
+        }
+        if (isRoman && isArabic) {
+            throw new IOException();
+        }
+
+        if (isRoman) {
+            symbols = input.split("[IVX]");
+            Arrays.sort(symbols);
+            String[] operandsRoman = input.split("[-+*/]");
+            for (int i = 0; i < operandsRoman.length; i++) {
+                operands[i] = convertFromRoman(operandsRoman[i]);
+            }
+        } else {
+            symbols = input.split("[0-9]+");
+            Arrays.sort(symbols);
+            String[] operandsString = input.split("[-+*/]");
+            for (int i = 0; i < operandsString.length; i++) {
+                operands[i] = Integer.parseInt(operandsString[i]);
+            }
+        }
+
+        // Only numbers between 1 and 10 accepted
+        for (int operand : operands) {
+            if ((operand > 10) || (operand < 1)) {
+                throw new IOException();
+            }
+        }
+
+        for (int i = 0; i < symbols.length; i++) {
+            if (symbols[i] != "") {
+                operator = symbols[i];
+            }
+        }
+
+        result = switch (operator) {
+            case "-" -> Operation.SUBTRACT(operands);
+            case "+" -> Operation.ADD(operands);
+            case "/" -> Operation.DIVIDE(operands);
+            case "*" -> Operation.MULTIPLY(operands);
+            default -> throw new IOException();
+        };
+
+        // For Roman can only be positive result
+        if (isRoman) {
+            if (result < 0) {
+                throw new IOException();
+            } else {
+                return convertToRoman(result);
+            }
+        } else {
+            return Integer.toString(result);
+        }
     }
 }
